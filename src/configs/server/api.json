@@ -1,0 +1,10 @@
+{
+  "development": {
+    "cards_order": "http://47.96.160.111:9948/cards_order",
+    "cards_order_mahjong": "http://120.26.161.247:9948/cards_order"
+  },
+  "production": {
+    "cards_order": "http://47.96.160.111:9948/cards_order",
+    "cards_order_mahjong": "http://120.26.161.247:9948/cards_order"
+  }
+}

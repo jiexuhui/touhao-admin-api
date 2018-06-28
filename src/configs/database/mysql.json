@@ -1,0 +1,20 @@
+{
+  "admin": {
+    "connConfig": {
+      "host": "127.0.0.1",
+      "user": "root",
+      "password": "root",
+      "database": "admin",
+      "connectionLimit": 100
+    }
+  },
+  "blGame": {
+    "connConfig": {
+      "host": "121.41.80.10",
+      "user": "ddba",
+      "password": "FishJoy@2015",
+      "database": "zjhccc",
+      "connectionLimit": 100
+    }
+  }
+}

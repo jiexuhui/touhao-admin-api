@@ -1,0 +1,3 @@
+{
+  "notneed": ["/admin/system/login", "/admin/system/logout"]
+}

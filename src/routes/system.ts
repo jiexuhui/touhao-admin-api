@@ -15,9 +15,9 @@ class SystemRouter {
     this.router
       .post("/login", system.login)
       .get("/userinfo", system.userinfo)
-      .get("/logout", system.logout)
+      .post("/logout", system.logout)
       .post("/loginlogslist", system.loginLogsList)
-      .get("/rolesmenu", system.rolesMenu)
+      .post("/usermenu", system.rolesMenu)
       .post("/modifyrolesmenu", system.modifyRolesMenu)
       .get("/roleslist", system.rolesList)
       .post("/delrole", system.delRole)

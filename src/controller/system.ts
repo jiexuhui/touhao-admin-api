@@ -38,6 +38,7 @@ class System {
       const loginResult: any = await dbSystem
         .login(username, newpwd)
         .catch(err => next(err));
+      debug("api:login:user")("username:" + username + "pwd:" + password);
       const loginInfo = loginResult[0];
       // const loginInfo: ILoginUser = Tools.handleResultOne(loginResult);
       if (loginInfo && loginInfo.userid) {

@@ -35,3 +35,7 @@ export const checkBtnPermission = (user: IUserInfo) => {
 export const checkIsUser = (user: IUserInfo) => {
   return false;
 };
+
+export const checkActionPermission = (roleid: number) => {
+  return true;
+};

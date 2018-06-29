@@ -1,10 +1,10 @@
 {
   "admin": {
     "connConfig": {
-      "host": "127.0.0.1",
-      "user": "root",
-      "password": "root",
-      "database": "admin",
+      "host": "121.41.80.10",
+      "user": "ddba",
+      "password": "FishJoy@2015",
+      "database": "touhaozhubo",
       "connectionLimit": 100
     }
   },

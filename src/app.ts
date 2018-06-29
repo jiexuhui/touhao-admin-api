@@ -12,6 +12,7 @@ import * as path from "path";
 // import { md5 } from "./compoents/crypto";
 import msgCode from "./compoents/msgcode";
 import {
+  checkActionPermission,
   checkBtnPermission,
   checkIsUser,
   checkMenuPermission,
@@ -125,10 +126,13 @@ class App {
                 return;
               }
               if (decoded) {
-                const { userid, username } = decoded;
+                const { roleid } = decoded;
                 // TODO:依次判断用户的信息、菜单权限、接口权限、按钮权限
-
-                next();
+                if (!checkActionPermission(roleid)) {
+                  res.json(msgCode.noPermission);
+                } else {
+                  next();
+                }
               } else {
                 res.json(msgCode.invalidToken);
                 return;

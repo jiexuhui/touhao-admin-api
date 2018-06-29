@@ -17,7 +17,7 @@ class SystemRouter {
       .get("/userinfo", system.userinfo)
       .post("/logout", system.logout)
       .post("/loginlogslist", system.loginLogsList)
-      .post("/usermenu", system.rolesMenu)
+      .post("/usermenu", system.userMenu)
       .post("/modifyrolesmenu", system.modifyRolesMenu)
       .get("/roleslist", system.rolesList)
       .post("/delrole", system.delRole)
@@ -27,11 +27,9 @@ class SystemRouter {
       .post("/addusersrole", system.addUserRole)
       .get("/menulist", system.menuList)
       .get("/menulistsimple", system.menuListSimple)
-      .get("/usersmenu", system.usersMenu)
       .get("/systemuser", system.systemUser)
       .post("/addsystemuser", system.addSystemUser)
-      .get("/positionlist", system.positionList)
-      .get("/departmentlist", system.departmentList);
+      .post("/editsystemuser", system.editSystemUser);
   }
 }
 

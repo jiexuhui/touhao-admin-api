@@ -19,10 +19,11 @@ class System {
    * @returns
    * @memberof System
    */
-  public static async login(username: string, password: string) {
-    return await db.exec("call p_admin_login(:username,:password)", {
+  public static async login(username: string, password: string, ip: string) {
+    return await db.exec("call p_admin_login(:username,:password,:ip)", {
       username,
-      password
+      password,
+      ip
     });
   }
   /**
@@ -98,8 +99,8 @@ class System {
    * @returns
    * @memberof System
    */
-  public static async rolesMenu(roleid: number) {
-    return await db.exec("call p_admin_rolesmenu(:roleid)", { roleid });
+  public static async rolesMenu(role: string) {
+    return await db.exec("call p_admin_rolesmenu(:role)", { role });
   }
   /**
    * 修改角色的菜单信息
@@ -251,9 +252,37 @@ class System {
    *
    * @static
    * @param {{
+   *     username: string;
+   *     nickname: string;
+   *     introduction: string;
+   *     avatar: string;
+   *     status: number;
+   *   }} params
+   * @returns
+   * @memberof System
+   */
+  public static async editSystemUser(params: {
+    username: string;
+    password: string;
+    ip: string;
+    nickname: string;
+    introduction: string;
+    avatar: string;
+    status: number;
+  }) {
+    return await db.exec(
+      "call p_admin_edit_system_user(:username,:password,:ip,:nickname,:introduction,:avatar,:status)",
+      params
+    );
+  }
+
+  /**
+   * 编辑系统用户
+   *
+   * @static
+   * @param {{
    *     avatar: string;
    *     department: number;
-   *     join_at: number;
    *     num: number;
    *     password: string;
    *     position: number;
@@ -265,40 +294,18 @@ class System {
    * @memberof System
    */
   public static async addSystemUser(params: {
-    avatar: string;
-    department: number;
-    join_at: number;
-    num: number;
-    password: string;
-    position: number;
-    status: number;
     username: string;
+    password: string;
+    ip: string;
     nickname: string;
+    introduction: string;
+    avatar: string;
+    status: number;
   }) {
     return await db.exec(
-      "call p_admin_add_system_user(:avatar,:department,:join_at,:num,:password,:position,:status,:username,:nickname)",
+      "call p_admin_add_system_user(:username,:password,:ip,:nickname,:introduction,:avatar,:status)",
       params
     );
-  }
-  /**
-   * 获取所有的职位列表
-   *
-   * @static
-   * @returns
-   * @memberof System
-   */
-  public static async positionList() {
-    return await db.exec("call p_admin_positions_list()");
-  }
-  /**
-   * 获取组织架构列表
-   *
-   * @static
-   * @returns
-   * @memberof System
-   */
-  public static async departmentList() {
-    return await db.exec("call p_admin_department_list()");
   }
 }
 export default System;

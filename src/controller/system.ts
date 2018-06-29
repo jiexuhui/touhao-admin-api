@@ -36,9 +36,13 @@ class System {
     if (username && password) {
       const newpwd = md5(`${saltStart}.${password}.${saltEnd}`);
       const loginResult: any = await dbSystem
-        .login(username, newpwd)
+        .login(
+          username,
+          newpwd,
+          req.get("X-Real-IP") || req.get("X-Forwarded-For") || req.ip
+        )
         .catch(err => next(err));
-      debug("api:login:user")("username:" + username + "pwd:" + password);
+      debug("api:login:user")("username:" + username + "pwd:" + newpwd);
       const loginInfo = loginResult[0];
       // const loginInfo: ILoginUser = Tools.handleResultOne(loginResult);
       if (loginInfo && loginInfo.userid) {
@@ -130,7 +134,7 @@ class System {
     const cert = fs.readFileSync(
       path.join(__dirname, "../configs/rsakey/rsa_key_pub.key")
     );
-    jw.verify(token, cert, (err: jw.JsonWebTokenError, decoded: any) => {
+    jw.verify(token, cert, async (err: jw.JsonWebTokenError, decoded: any) => {
       if (err) {
         debug("api:system:login")("error: " + err.message);
         res.json(msgCode.expiredToken);
@@ -138,9 +142,16 @@ class System {
       }
       if (decoded) {
         debug("api:system:login")("decoded:%o ", decoded);
-        const userinfo = decoded;
+        const username = decoded.username;
+        const pwd = decoded.password;
+        const loginResult: any = await dbSystem.login(
+          username,
+          pwd,
+          req.get("X-Real-IP") || req.get("X-Forwarded-For") || req.ip
+        );
+        const loginInfo = loginResult[0];
         // TODO:依次判断用户的信息、菜单权限、接口权限、按钮权限
-        msgCode.success.data = userinfo;
+        msgCode.success.data = loginInfo;
         res.json(msgCode.success);
         return;
       } else {
@@ -237,8 +248,8 @@ class System {
     res: Response,
     next: NextFunction
   ) {
-    const role: number = req.query.roleid || 0;
-    if (role && role > 0) {
+    const role: string = req.query.role || "";
+    if (role) {
       const menuData = await dbSystem
         .rolesMenu(role)
         .then(data => Tools.handleResult(data))
@@ -452,33 +463,19 @@ class System {
    * @param {NextFunction} next
    * @memberof System
    */
-  public static async usersMenu(
+  public static async userMenu(
     req: Request,
     res: Response,
     next: NextFunction
   ) {
-    const userid: number = req.query.userid || 0;
-    if (userid && userid > 0) {
-      const usersRole = await dbSystem
-        .usersRole(userid)
-        .catch(err => next(err));
-      const roleItem = Tools.handleResult(usersRole);
+    const role: string = req.body.role || "";
+    if (role) {
+      // const roleItem = Tools.handleResult(role);
       const usersMenu = [];
-      for (const r of roleItem) {
-        const roleMenu = await dbSystem
-          .rolesMenu(r.roleid)
-          .catch(err => next(err));
-        usersMenu.push(...Tools.handleResult(roleMenu));
-      }
-      const idArr: number[] = [];
-      usersMenu.map((menu, index) => {
-        if (idArr.indexOf(menu.id) < 0) {
-          idArr.push(menu.id);
-        } else {
-          usersMenu.splice(index, 1);
-        }
-      });
-      msgCode.success.data = await System.buildMenu(usersMenu);
+      // for (const r of roleItem) {
+      const roleMenu = await dbSystem.rolesMenu(role).catch(err => next(err));
+      debug("api:system:usermenu:")("roleMenu:%o", roleMenu);
+      msgCode.success.data = await System.buildMenu(roleMenu);
       res.json(msgCode.success);
     } else {
       res.json(msgCode.parmasError);
@@ -499,9 +496,9 @@ class System {
     res: Response,
     next: NextFunction
   ) {
-    const { username = "", pageindex = 1, pagesize = 30 } = req.query;
+    const { username = "", page = 1, limit = 30 } = req.query;
     await dbSystem
-      .systemUser(username, pageindex, pagesize)
+      .systemUser(username, page, limit)
       .then(data => {
         if (data && data.length > 0) {
           msgCode.success.data = data;
@@ -529,27 +526,32 @@ class System {
   ) {
     const reqData = req.body;
     reqData.password = md5(`${saltStart}.${reqData.password}.${saltEnd}`);
-    reqData.department = parseInt(reqData.department.splice(-1), 10);
-    const role: number[] = req.body.role;
+    reqData.ip = req.get("X-Real-IP") || req.get("X-Forwarded-For") || req.ip;
     const addResult: any = await dbSystem
       .addSystemUser(reqData)
       .then(data => Tools.handleResult(data))
       .catch(err => next(err));
+    if (addResult.code === 10003) {
+      res.json(msgCode.existsUser);
+      return;
+    }
     if (addResult && addResult.id) {
-      for (const r of role) {
-        await dbSystem
-          .addUserRole(addResult.id, r)
-          .then((data: any) => Tools.handleResult(data))
-          .catch(err => next(err));
-      }
+      // for (const r of role) {
+      //   await dbSystem
+      //     .addUserRole(addResult.id, r)
+      //     .then((data: any) => Tools.handleResult(data))
+      //     .catch(err => next(err));
+      // }
       res.json(msgCode.success);
+      return;
     } else {
       res.json(msgCode.exception);
+      return;
     }
   }
 
   /**
-   * 获取职位列表
+   * 添加系统用户
    *
    * @static
    * @param {Request} req
@@ -557,42 +559,34 @@ class System {
    * @param {NextFunction} next
    * @memberof System
    */
-  public static async positionList(
+  public static async editSystemUser(
     req: Request,
     res: Response,
     next: NextFunction
   ) {
-    const data = await dbSystem.positionList().catch(err => next(err));
-    msgCode.success.data = Tools.handleResult(data);
-    res.json(msgCode.success);
-  }
-
-  /**
-   * 获取组织架构
-   *
-   * @static
-   * @param {Request} req
-   * @param {Response} res
-   * @param {NextFunction} next
-   * @memberof System
-   */
-  public static async departmentList(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) {
-    const data: any = await dbSystem.departmentList().catch(err => next(err));
-    const department = Tools.handleResult(data);
-    if (department && department.length > 0) {
-      const dep = [];
-      for (const m of department) {
-        if (m.parentid === 0) {
-          System.buildTree(m, department);
-          dep.push(m);
-        }
-      }
-      msgCode.success.data = dep;
+    const reqData = req.body;
+    reqData.password = md5(`${saltStart}.${reqData.password}.${saltEnd}`);
+    reqData.ip = req.get("X-Real-IP") || req.get("X-Forwarded-For") || req.ip;
+    const editResult: any = await dbSystem
+      .editSystemUser(reqData)
+      .then(data => Tools.handleResult(data))
+      .catch(err => next(err));
+    if (editResult.code === 10001) {
+      res.json({ code: 10003, msg: "用户不存在" });
+      return;
+    }
+    if (editResult && editResult.code === 200) {
+      // for (const r of role) {
+      //   await dbSystem
+      //     .addUserRole(addResult.id, r)
+      //     .then((data: any) => Tools.handleResult(data))
+      //     .catch(err => next(err));
+      // }
       res.json(msgCode.success);
+      return;
+    } else {
+      res.json(msgCode.exception);
+      return;
     }
   }
 
@@ -607,7 +601,7 @@ class System {
    */
   private static buildTree(m: any, menus: any) {
     for (const menu of menus) {
-      if (menu.parentid === m.id) {
+      if (menu.pid === m.id) {
         if (!m.children) {
           m.children = [];
         }
@@ -627,19 +621,19 @@ class System {
    * @memberof System
    */
   private static buildMenu(menus: any) {
+    debug("api:menu:buildmenu")("menus", menus);
     const menu = [];
     for (const m of menus) {
-      const { title, icon, describe, requiresauth } = m;
-      m.meta = { title, icon, describe, requiresauth: !!requiresauth };
+      const { title, icon } = m;
+      m.meta = { title, icon };
       delete m.title;
       delete m.icon;
-      delete m.describe;
-      delete m.requiresauth;
-      if (m.parentid === 0) {
+      if (m.pid === 0) {
         System.buildTree(m, menus);
         menu.push(m);
       }
     }
+    debug("api:menu:buildmenu")("buildMenu", menu);
     return menu;
   }
 

@@ -323,18 +323,18 @@ class System {
    * @param {NextFunction} next
    * @memberof System
    */
-  public static async rolesList(
+  public static async roles(
     req: Request,
     res: Response,
     next: NextFunction
   ) {
-    await dbSystem
+    const data = await dbSystem
       .rolesList()
-      .then(data => {
-        msgCode.success.data = Tools.handleResult(data);
-        res.json(msgCode.success);
-      })
+      .then()
       .catch(err => next(err));
+    await dbSystem.addoperatelog(req.session.user.username, "查看角色列表", req.originalUrl);
+    msgCode.success.data = data;
+    res.json(msgCode.success);
   }
 
   /**
@@ -347,11 +347,19 @@ class System {
    * @memberof System
    */
   public static async delRole(req: Request, res: Response, next: NextFunction) {
-    const { roleid = 0 } = req.body;
-    await dbSystem
-      .delRole(roleid)
-      .then((data: any) => res.json(Tools.handleResult(data)))
+    const { id = 0 } = req.body;
+    const username = req.session.user.username;
+    const resdata = await dbSystem
+      .delRole(id)
+      .then(data => Tools.handleResult(data))
       .catch(err => next(err));
+    if ( resdata.code === 1 ) {
+      await dbSystem.addoperatelog(username, "删除角色", "roleid:" + id);
+      msgCode.success.data = resdata;
+      res.json(msgCode.success);
+    } else {
+      res.json(msgCode.error);
+    }
   }
 
   /**
@@ -364,15 +372,26 @@ class System {
    * @memberof System
    */
   public static async addRole(req: Request, res: Response, next: NextFunction) {
-    const { name = "", is_use = 1, sort = 0 } = req.body;
-    if (!name) {
+    const { rolename = ""} = req.body;
+    if (!rolename) {
       res.json(msgCode.parmasError);
       return;
     }
-    await dbSystem
-      .addRole(_.trim(name), is_use, sort)
-      .then((data: any) => res.json(Tools.handleResult(data)))
+    const result = await dbSystem
+      .addRole(_.trim(rolename))
+      .then(data => Tools.handleResult(data))
       .catch(err => next(err));
+    debug("api:system:addrole")("addrolers:%o", result);
+    if ( result.code === 10004 ) {
+      res.json(msgCode.existsRole);
+    } else if (result.code === 1) {
+      await dbSystem.addoperatelog(req.session.user.username, "添加角色", "roleid:" + result.id);
+      msgCode.success.data = result;
+      res.json(msgCode.success);
+    } else {
+      res.json(msgCode.error);
+    }
+    return;
   }
 
   /**
@@ -389,69 +408,24 @@ class System {
     res: Response,
     next: NextFunction
   ) {
-    const { id = 0, name = "", is_use = 1, sort = 0 } = req.body;
-    if (!name || id === 0) {
+    const { id = 0, rolename = ""} = req.body;
+    if (!rolename || id === 0) {
       res.json(msgCode.parmasError);
       return;
     }
-    await dbSystem
-      .editRole(id, _.trim(name), is_use, sort)
-      .then(data => res.json(Tools.handleResult(data)))
+    const result = await dbSystem
+      .editRole(id, _.trim(rolename))
+      .then(data => Tools.handleResult(data))
       .catch(err => next(err));
-  }
-
-  /**
-   * 用户角色
-   *
-   * @static
-   * @param {Request} req
-   * @param {Response} res
-   * @param {NextFunction} next
-   * @memberof System
-   */
-  public static async usersRole(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) {
-    const userid: number = req.query.userid || 0;
-    if (userid && userid > 0) {
-      await dbSystem
-        .usersRole(userid)
-        .then(data => {
-          msgCode.success.data = Tools.handleResult(data);
-          res.json(msgCode.success);
-        })
-        .catch(err => next(err));
+    debug("api:system:editrole")("editrolers:%o", result);
+    if ( result.code > 0) {
+      await dbSystem.addoperatelog(req.session.user.username, "编辑角色", "roleid:" + id);
+      msgCode.success.data = result;
+      res.json(Tools.handleResult(msgCode.success));
     } else {
-      res.json(msgCode.parmasError);
+      res.json(msgCode.exception);
     }
-  }
-
-  /**
-   * 添加用户角色
-   *
-   * @static
-   * @param {Request} req
-   * @param {Response} res
-   * @param {NextFunction} next
-   * @returns
-   * @memberof System
-   */
-  public static async addUserRole(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) {
-    const { userid = 0, roleid = [] } = req.body;
-    if (!userid || !roleid) {
-      res.json(msgCode.parmasError);
-      return;
-    }
-    for (const r of roleid) {
-      await dbSystem.addUserRole(userid, r);
-    }
-    res.json(msgCode.success);
+    return;
   }
 
   /**
@@ -474,7 +448,7 @@ class System {
       const usersMenu = [];
       // for (const r of roleItem) {
       const roleMenu = await dbSystem.rolesMenu(role).catch(err => next(err));
-      debug("api:system:usermenu:")("roleMenu:%o", roleMenu);
+      // debug("api:system:usermenu:")("roleMenu:%o", roleMenu);
       msgCode.success.data = await System.buildMenu(roleMenu);
       res.json(msgCode.success);
     } else {
@@ -491,23 +465,22 @@ class System {
    * @param {NextFunction} next
    * @memberof System
    */
-  public static async systemUser(
+  public static async users(
     req: Request,
     res: Response,
     next: NextFunction
   ) {
     const { username = "", page = 1, limit = 30 } = req.query;
-    await dbSystem
-      .systemUser(username, page, limit)
-      .then(data => {
-        if (data && data.length > 0) {
-          msgCode.success.data = data;
-          res.json(msgCode.success);
-          return;
-        }
-        res.json(msgCode.successWithoutData);
-      })
-      .catch(err => next(err));
+    const result = await dbSystem
+      .systemUser(username, page, limit).then().catch(err => next(err));
+    if (result && result.length > 0) {
+      await dbSystem.addoperatelog(req.session.user.username, "查看后台用户列表", "查看后台用户列表");
+      msgCode.success.data = result;
+      res.json(msgCode.success);
+    } else {
+      res.json(msgCode.successWithoutData);
+    }
+    return;
   }
 
   /**
@@ -527,6 +500,7 @@ class System {
     const reqData = req.body;
     reqData.password = md5(`${saltStart}.${reqData.password}.${saltEnd}`);
     reqData.ip = req.get("X-Real-IP") || req.get("X-Forwarded-For") || req.ip;
+    debug("api:system:adduser")("addrreqDataesult:%o", reqData);
     const addResult: any = await dbSystem
       .addSystemUser(reqData)
       .then(data => Tools.handleResult(data))
@@ -535,13 +509,10 @@ class System {
       res.json(msgCode.existsUser);
       return;
     }
-    if (addResult && addResult.id) {
-      // for (const r of role) {
-      //   await dbSystem
-      //     .addUserRole(addResult.id, r)
-      //     .then((data: any) => Tools.handleResult(data))
-      //     .catch(err => next(err));
-      // }
+    debug("api:system:adduser")("addresult:%o", addResult);
+    if (addResult && addResult[0].id) {
+      await dbSystem.addoperatelog(req.session.user.username, "添加用户", JSON.stringify(reqData));
+      msgCode.success.data = addResult[0];
       res.json(msgCode.success);
       return;
     } else {
@@ -551,7 +522,7 @@ class System {
   }
 
   /**
-   * 添加系统用户
+   * 编辑系统用户
    *
    * @static
    * @param {Request} req
@@ -565,7 +536,10 @@ class System {
     next: NextFunction
   ) {
     const reqData = req.body;
-    reqData.password = md5(`${saltStart}.${reqData.password}.${saltEnd}`);
+    reqData.roleid = Number(req.body.roleid);
+    if ( reqData.password !== "" ) {
+      reqData.password = md5(`${saltStart}.${reqData.password}.${saltEnd}`);
+    }
     reqData.ip = req.get("X-Real-IP") || req.get("X-Forwarded-For") || req.ip;
     const editResult: any = await dbSystem
       .editSystemUser(reqData)
@@ -576,12 +550,8 @@ class System {
       return;
     }
     if (editResult && editResult.code === 200) {
-      // for (const r of role) {
-      //   await dbSystem
-      //     .addUserRole(addResult.id, r)
-      //     .then((data: any) => Tools.handleResult(data))
-      //     .catch(err => next(err));
-      // }
+      await dbSystem.addoperatelog(req.session.user.username, "编辑用户", JSON.stringify(reqData));
+      msgCode.success.data = editResult;
       res.json(msgCode.success);
       return;
     } else {
@@ -600,6 +570,8 @@ class System {
    * @memberof System
    */
   private static buildTree(m: any, menus: any) {
+    // debug("api:menu:buildTree")("m", m);
+    // debug("api:menu:buildTree")("menus", menus);
     for (const menu of menus) {
       if (menu.pid === m.id) {
         if (!m.children) {
@@ -621,19 +593,17 @@ class System {
    * @memberof System
    */
   private static buildMenu(menus: any) {
-    debug("api:menu:buildmenu")("menus", menus);
+    // debug("api:menu:buildmenu1")("menus", menus);
     const menu = [];
     for (const m of menus) {
       const { title, icon } = m;
       m.meta = { title, icon };
-      delete m.title;
-      delete m.icon;
       if (m.pid === 0) {
         System.buildTree(m, menus);
         menu.push(m);
       }
     }
-    debug("api:menu:buildmenu")("buildMenu", menu);
+    // debug("api:menu:buildmenu2")("buildMenu", menu);
     return menu;
   }
 
@@ -655,6 +625,175 @@ class System {
       }
     }
     return menu;
+  }
+
+  /**
+   * 检查动作权限
+   * @param req
+   */
+  public static async checkpemission(req: any) {
+    const url = req.path.slice(7);
+    const roleid = req.session.user.roleid;
+    const result = await dbSystem.checkPemission(url, roleid).then();
+    debug("api:checkpemission")("checkpemission:%o", result);
+    return result;
+  }
+
+  /**
+   * 后台操作日志列表
+   * @param req
+   * @param res
+   * @param next
+   */
+  public static async operatelogs(req: Request, res: Response, next: NextFunction) {
+    const { username = "", time = [], page = 1, limit = 30 } = req.body;
+    await dbSystem.oprateLoglist(username, time[0] || "", time[1] || "", page, limit)
+    .then(data => {
+      msgCode.success.data = data;
+      res.json(msgCode.success);
+      return;
+    }).catch(err => next(err));
+    await dbSystem.addoperatelog(req.session.user.username, "查看后台操作日志", "查看后台操作日志");
+  }
+
+  /**
+   * 获取菜单列表
+   * @param req
+   * @param res
+   * @param next
+   */
+  public static async menus(req: Request, res: Response, next: NextFunction) {
+    const data = await dbSystem.menuList();
+    const menus = await System.buildMenu(data);
+    msgCode.success.data = menus;
+    await dbSystem.addoperatelog(req.session.user.username, "查看后台菜单设置", "查看后台菜单设置");
+    res.json(msgCode.success);
+    return;
+  }
+
+  /**
+   * 增加菜单
+   * @param req
+   * @param res
+   * @param next
+   */
+  public static async addmenu(req: Request, res: Response, next: NextFunction) {
+    const params = req.body;
+    debug("api:addmenu:")("params:%o", params);
+    const resdata = await dbSystem.addmenu(params);
+    if (resdata[0].code === 200) {
+      await dbSystem.addoperatelog(req.session.user.username, "增加后台菜单", "增加后台菜单：id=" + resdata[0].id);
+      msgCode.success.data = resdata[0];
+      debug("api:addmenu:")("resdata:%o", resdata);
+      res.json(msgCode.success);
+    } else if (resdata[0].code === 10001) {
+      res.json(msgCode.parmasError);
+    } else if (resdata[0].code === 10002) {
+      res.json(msgCode.existsMenu);
+    }
+    return;
+  }
+
+  /**
+   * 编辑菜单
+   * @param req
+   * @param res
+   * @param next
+   */
+  public static async editmenu(req: Request, res: Response, next: NextFunction) {
+    const params = req.body;
+    debug("api:editmenu:")("params:%o", params);
+    const resdata = await dbSystem.editmenu(params);
+    if (resdata[0].code === 200) {
+      await dbSystem.addoperatelog(req.session.user.username, "编辑后台菜单", "增加后台菜单：id=" + params.id);
+      msgCode.success.data = resdata[0];
+      debug("api:addmenu:")("resdata:%o", resdata);
+      res.json(msgCode.success);
+    } else if (resdata[0].code === 10001) {
+      res.json(msgCode.parmasError);
+    }
+    return;
+  }
+
+  /**
+   * 删除菜单
+   * @param req
+   * @param res
+   * @param next
+   */
+  public static async delmenu(req: Request, res: Response, next: NextFunction) {
+    const { id } = req.body;
+    debug("api:delmenu:")("menuid:", id);
+    const resdata = await dbSystem.delmenu(id);
+    if (resdata[0].code === 1) {
+      await dbSystem.addoperatelog(req.session.user.username, "删除后台菜单", "删除后台菜单：id=" + id);
+      msgCode.success.data = resdata[0];
+      debug("api:delmenu:")("resdata:%o", resdata);
+      res.json(msgCode.success);
+    } else {
+      res.json(msgCode.error);
+    }
+    return;
+  }
+
+  /**
+   * 获取默选id
+   * @param req
+   * @param res
+   * @param next
+   */
+  public static async defaultcheck(req: Request, res: Response, next: NextFunction) {
+    const {rolename = ""} = req.body;
+    debug("api:defaultcheck:")("rolename:", rolename);
+    const rolememnu =  await dbSystem.defaultmenu(rolename);
+    const ids = [];
+    for ( const item of rolememnu) {
+      ids.push(item.id);
+    }
+    debug("api:defaultcheck:")("ids:%o", ids);
+    msgCode.success.data = ids;
+    res.json(msgCode.success);
+    return;
+  }
+
+  /**
+   * 修改角色权限
+   * @param req
+   * @param res
+   * @param next
+   */
+  public static async userpermission(req: Request, res: Response, next: NextFunction) {
+    debug("api:userpermission:")("body:%o", req.body);
+    const roleid = req.body.id;
+    const menuids = req.body.menuids.toString();
+    debug("api:userpermission:")("roleid:" + roleid + "menuids:" + menuids);
+    const resdata = await dbSystem.updateRolePermission(roleid, menuids);
+    if (resdata[0].code === 200) {
+      // tslint:disable-next-line:max-line-length
+      await dbSystem.addoperatelog(req.session.user.username, "修改角色权限", "修改角色权限,roleid=" + roleid + "menuids" + menuids);
+      msgCode.success.data = resdata[0];
+      debug("api:delmenu:")("resdata:%o", resdata);
+      res.json(msgCode.success);
+    } else {
+      res.json(msgCode.error);
+    }
+    return;
+  }
+
+  /**
+   * 后台操作日志列表
+   * @param req
+   * @param res
+   * @param next
+   */
+  public static async loginlogs(req: Request, res: Response, next: NextFunction) {
+    const { username = "", time = [], page = 1, limit = 30 } = req.body;
+    const resdata =  await dbSystem.loginlogs(username, time[0] || "", time[1] || "", page, limit)
+    .then().catch(err => next(err));
+    await dbSystem.addoperatelog(req.session.user.username, "查看后台登录日志", "查看后台登录日志");
+    msgCode.success.data = resdata;
+    res.json(msgCode.success);
+    return;
   }
 }
 

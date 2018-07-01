@@ -74,13 +74,9 @@ class System {
   /**
    * 获取后台菜单列表
    *
-   * @static
-   * @param {number} roleid 用户ID
-   * @returns
-   * @memberof System
    */
   public static async menuList() {
-    return await db.exec("call p_admin_menulist()");
+    return await db.exec("call p_admin_menu_list()");
   }
   /**
    * 获取基本的菜单信息，只有id,title,parentid
@@ -101,6 +97,17 @@ class System {
    */
   public static async rolesMenu(role: string) {
     return await db.exec("call p_admin_rolesmenu(:role)", { role });
+  }
+
+  /**
+   * 获取某个角色默认菜单
+   *
+   * @static
+   * @returns
+   * @memberof System
+   */
+  public static async defaultmenu(role: string) {
+    return await db.exec("call p_admin_menu_defeault(:role)", { role });
   }
   /**
    * 修改角色的菜单信息
@@ -130,7 +137,7 @@ class System {
    * @memberof System
    */
   public static async rolesList() {
-    return await db.exec("call p_admin_roles_list()");
+    return await db.execMultiple("call p_admin_roles_list()");
   }
   /**
    * 删除某个角色
@@ -149,20 +156,16 @@ class System {
    * @static
    * @param {number} roleid 角色id
    * @param {string} rolename 角色名
-   * @param {number} isuse 是否使用
-   * @param {number} sort 排序
    * @returns
    * @memberof System
    */
   public static async editRole(
     roleid: number,
-    rolename: string,
-    isuse: number,
-    sort: number
+    rolename: string
   ) {
     return await db.exec(
-      "call p_admin_edit_role(:roleid, :rolename,:isuse, :sort)",
-      { roleid, rolename, isuse, sort }
+      "call p_admin_edit_role(:roleid, :rolename)",
+      { roleid, rolename}
     );
   }
   /**
@@ -170,56 +173,12 @@ class System {
    *
    * @static
    * @param {string} rolename 角色名
-   * @param {number} isuse 是否使用
-   * @param {number} sort 排序
    * @returns
    * @memberof System
    */
-  public static async addRole(rolename: string, isuse: number, sort: number) {
-    return await db.exec("call p_admin_add_role(:rolename,:isuse, :sort)", {
-      rolename,
-      isuse,
-      sort
-    });
-  }
-  /**
-   * 获取用户的所有角色
-   *
-   * @static
-   * @param {number} userid 用户id
-   * @memberof System
-   */
-  public static async usersRole(userid: number) {
-    return await db.exec("call p_admin_user_role(:userid)", { userid });
-  }
-  /**
-   * 添加用户角色
-   *
-   * @static
-   * @param {number} userid 用户ID
-   * @param {number} roleid 角色ID
-   * @returns
-   * @memberof System
-   */
-  public static async addUserRole(userid: number, roleid: number) {
-    return await db.exec("call p_admin_add_user_role(:userid, :roleid)", {
-      userid,
-      roleid
-    });
-  }
-  /**
-   * 修改用户角色
-   *
-   * @static
-   * @param {number} userid 用户ID
-   * @param {number} roleid 角色ID
-   * @returns
-   * @memberof System
-   */
-  public static async modifyUserRole(userid: number, roleid: number) {
-    return await db.exec("call p_admin_modify_user_role(:userid, :roleid)", {
-      userid,
-      roleid
+  public static async addRole(rolename: string) {
+    return await db.exec("call p_admin_add_role(:rolename)", {
+      rolename
     });
   }
   /**
@@ -262,6 +221,7 @@ class System {
    * @memberof System
    */
   public static async editSystemUser(params: {
+    id: number;
     username: string;
     password: string;
     ip: string;
@@ -269,9 +229,10 @@ class System {
     introduction: string;
     avatar: string;
     status: number;
+    roleid: number;
   }) {
     return await db.exec(
-      "call p_admin_edit_system_user(:username,:password,:ip,:nickname,:introduction,:avatar,:status)",
+      "call p_admin_edit_system_user(:id,:username,:password,:ip,:nickname,:introduction,:avatar,:status,:roleid)",
       params
     );
   }
@@ -301,11 +262,126 @@ class System {
     introduction: string;
     avatar: string;
     status: number;
+    roleid: number
   }) {
     return await db.exec(
-      "call p_admin_add_system_user(:username,:password,:ip,:nickname,:introduction,:avatar,:status)",
+      "call p_admin_add_system_user(:username,:password,:ip,:nickname,:introduction,:avatar,:status,:roleid)",
       params
     );
+  }
+
+  /**
+   * 检查权限
+   * @param url
+   * @param roleid
+   */
+  public static async checkPemission(url: string, roleid: number) {
+    return await db.exec(
+      "call p_admin_checkperssion(:url,:roleid)",
+      {url, roleid}
+    );
+  }
+
+  /**
+   * 操作日志列表
+   * @param username
+   * @param stime
+   * @param etime
+   * @param page
+   * @param limit
+   */
+  public static async oprateLoglist(
+    username: string,
+    stime: string,
+    etime: string,
+    page: number,
+    limit: number
+  ) {
+    return await db.execMultiple("call p_admin_operate_log(:username,:stime,:etime,:page,:limit)",
+    {username, stime, etime, page, limit});
+  }
+
+  /**
+   * 增加操作日志
+   * @param username
+   * @param title
+   * @param content
+   */
+  public static async addoperatelog(username: string, title: string, content: string) {
+    return await db.exec("call p_admin_add_operatelog(:username,:title,:content)",
+    {username, title, content});
+  }
+
+  /**
+   * 添加菜单
+   * @param params
+   */
+  public static async addmenu(params: {
+    pid: number;
+    name: string;
+    title: string;
+    path: string;
+    icon_style: string;
+    display: number;
+    sort: number;
+    isaction: number;
+  }) {
+    return await db.exec("call p_admin_menu_add(:pid,:name,:title,:path,:icon_style,:display,:sort,:isaction)", params);
+  }
+
+  /**
+   * 编辑菜单
+   * @param params
+   */
+  public static async editmenu(params: {
+    id: number,
+    name: string;
+    title: string;
+    path: string;
+    icon_style: string;
+    display: number;
+    sort: number;
+    isaction: number;
+  }) {
+    return await db.exec("call p_admin_menu_edit(:id,:name,:title,:path,:icon_style,:display,:sort,:isaction)", params);
+  }
+
+  /**
+   * 删除菜单
+   * @param params
+   */
+  public static async delmenu(id: number ) {
+    return await db.exec("call p_admin_menu_del(:id)", {id});
+  }
+
+  /**
+   * 修改角色权限
+   * @param params
+   */
+  public static async updateRolePermission(
+    roleid: number,
+    menuids
+  ) {
+    return await db.exec("call p_admin_role_permission(:roleid, :menuids)", {roleid, menuids});
+  }
+
+  /**
+   * 登录日志列表
+   * @param username
+   * @param stime
+   * @param etime
+   * @param page
+   * @param limit
+   */
+  public static async loginlogs(
+    username: string,
+    stime: string,
+    etime: string,
+    page: number,
+    limit: number
+  ) {
+    return await db.execMultiple("call p_admin_login_loglist(:username,:stime,:etime,:page,:limit)",
+    {username, stime, etime, page, limit});
   }
 }
 export default System;

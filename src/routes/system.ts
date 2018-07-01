@@ -19,17 +19,22 @@ class SystemRouter {
       .post("/loginlogslist", system.loginLogsList)
       .post("/usermenu", system.userMenu)
       .post("/modifyrolesmenu", system.modifyRolesMenu)
-      .get("/roleslist", system.rolesList)
+      .get("/roles", system.roles)
       .post("/delrole", system.delRole)
       .post("/addrole", system.addRole)
       .post("/editrole", system.editRole)
-      .get("/usersrole", system.usersRole)
-      .post("/addusersrole", system.addUserRole)
-      .get("/menulist", system.menuList)
       .get("/menulistsimple", system.menuListSimple)
-      .get("/systemuser", system.systemUser)
+      .get("/users", system.users)
       .post("/addsystemuser", system.addSystemUser)
-      .post("/editsystemuser", system.editSystemUser);
+      .post("/editsystemuser", system.editSystemUser)
+      .post("/operatelogs", system.operatelogs)
+      .post("/menus", system.menus)
+      .post("/addmenu", system.addmenu)
+      .post("/editmenu", system.editmenu)
+      .post("/delmenu", system.delmenu)
+      .post("/defaultcheck", system.defaultcheck)
+      .post("/userpermission", system.userpermission)
+      .post("/loginlogs", system.loginlogs);
   }
 }
 

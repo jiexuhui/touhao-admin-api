@@ -12,12 +12,9 @@ import * as path from "path";
 // import { md5 } from "./compoents/crypto";
 import msgCode from "./compoents/msgcode";
 import {
-  checkActionPermission,
-  checkBtnPermission,
-  checkIsUser,
-  checkMenuPermission,
-  checkUrlPermission
+  checkMenuPermission
 } from "./compoents/permission";
+import system from "./controller/system";
 import router from "./routes";
 // session秘钥
 const sessionSecret = "zeqg4lz67cpkutkw0oumfot5idlzog93n";
@@ -119,7 +116,7 @@ class App {
           jwt.verify(
             token,
             cert,
-            (err: jwt.JsonWebTokenError, decoded: any) => {
+            async (err: jwt.JsonWebTokenError, decoded: any) => {
               if (err) {
                 this.debugLog(err.message);
                 res.json(msgCode.expiredToken);
@@ -127,9 +124,19 @@ class App {
               }
               if (decoded) {
                 const { roleid } = decoded;
+                this.debugLog("roleid:" + roleid);
+
                 // TODO:依次判断用户的信息、菜单权限、接口权限、按钮权限
-                if (!checkActionPermission(roleid)) {
-                  res.json(msgCode.noPermission);
+                // this.debugLog("roleid:", system.checkpemission(req));
+                if (!authority.actionWhitelist.includes(req.path)) {
+                  const permission = await system.checkpemission(req);
+                  this.debugLog("roleidperssion:%o" , permission);
+                  if (permission[0].code === 0) {
+                    res.json(msgCode.noPermission);
+                    return;
+                  } else {
+                    next();
+                  }
                 } else {
                   next();
                 }

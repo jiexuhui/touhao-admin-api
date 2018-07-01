@@ -12,7 +12,9 @@ class ServerRouter {
     this.init();
   }
   private init() {
-    this.router.post("/cards_order", server.cardsOrder);
+    this.router.post("/tags", server.tags)
+    .post("/addtag", server.addtag)
+    .post("/deltag", server.deltag);
   }
 }
 

@@ -3,6 +3,8 @@ import * as debug from "debug";
 import { NextFunction, Request, Response } from "express";
 const serverCondig = require("../configs/server/api.json");
 import msgCode from "../compoents/msgcode";
+import dbServer from "../service/server";
+import dbSystem from "../service/system";
 
 const debugLog = debug("api:controller:server");
 
@@ -13,59 +15,58 @@ const debugLog = debug("api:controller:server");
  */
 class Server {
   /**
-   * 自定义发牌
-   *
-   * @static
-   * @param {Request} req
-   * @param {Response} res
-   * @param {NextFunction} next
-   * @memberof Server
+   * 获取tag列表
+   * @param req
+   * @param res
+   * @param next
    */
-  public static async cardsOrder(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) {
-    const { game_id = 0, room_id = 0, table_id = 0, cards = [] } = req.body;
+  public static async tags(req: Request, res: Response, next: NextFunction) {
+    const { tagname = "", time = [], page = 1, limit = 30 } = req.body;
+    const shopid = req.session.user.userid;
+    const resdata = await dbServer.tags(tagname, shopid, time[0] || "", time[1] || "", page, limit).then();
+    await dbSystem.addoperatelog(req.session.user.username, "查看标签", "查看标签");
+    msgCode.success.data = resdata;
+    res.json(msgCode.success);
+    return;
+  }
 
-    if (game_id === 0 || room_id === 0 || cards.length <= 0) {
-      res.json(msgCode.parmasError);
-      return;
+  /**
+   * 添加tag
+   * @param req
+   * @param res
+   * @param next
+   */
+  public static async addtag(req: Request, res: Response, next: NextFunction) {
+    const { tagname = ""} = req.body;
+    const userid = req.session.user.userid;
+    const resdata = await dbServer.addtag(tagname, userid).then();
+    if (resdata[0].code === 200) {
+      await dbSystem.addoperatelog(req.session.user.username, "添加标签", "添加标签：tagname:" + tagname);
+      msgCode.success.data = resdata;
+      res.json(msgCode.success);
+    } else {
+      res.json(msgCode.existsTag);
     }
-    const env = process.env.NODE_ENV || "production";
-    debugLog(`the current environment variable is: ${env}`);
-    debugLog(`now send to server:${serverCondig[env].cards_order}`);
-    let postUrl = "";
-    if (game_id === 100) {
-      postUrl = serverCondig[env].cards_order_mahjong;
+    return;
+  }
+
+  /**
+   * 添加tag
+   * @param req
+   * @param res
+   * @param next
+   */
+  public static async deltag(req: Request, res: Response, next: NextFunction) {
+    const { tagid = 0} = req.body;
+    const resdata = await dbServer.deltag(tagid).then();
+    if (resdata[0].code === 200) {
+      await dbSystem.addoperatelog(req.session.user.username, "删除标签", "添加标签：tagid:" + tagid);
+      msgCode.success.data = resdata;
+      res.json(msgCode.success);
+    } else {
+      res.json(msgCode.existsTag);
     }
-    if (game_id === 101) {
-      postUrl = serverCondig[env].cards_order;
-    }
-    axios
-      .post(
-        postUrl,
-        {
-          game_id,
-          room_id,
-          table_id,
-          cards
-        },
-        {
-          headers: {
-            "Content-Type": "application/json"
-          }
-        }
-      )
-      .then(result => {
-        msgCode.success.data = result.data || [];
-        res.json(msgCode.success);
-      })
-      .catch(err => {
-        msgCode.error.msg =
-          (err.response && err.response.data.err) || "未知错误";
-        res.json(msgCode.error);
-      });
+    return;
   }
 }
 export default Server;

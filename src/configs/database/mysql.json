@@ -2,18 +2,9 @@
   "admin": {
     "connConfig": {
       "host": "121.41.80.10",
-      "user": "ddba",
-      "password": "FishJoy@2015",
-      "database": "touhaozhubo",
-      "connectionLimit": 100
-    }
-  },
-  "blGame": {
-    "connConfig": {
-      "host": "121.41.80.10",
-      "user": "ddba",
-      "password": "FishJoy@2015",
-      "database": "zjhccc",
+      "user": "root",
+      "password": "root",
+      "database": "demo",
       "connectionLimit": 100
     }
   }

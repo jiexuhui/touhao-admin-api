@@ -12,9 +12,18 @@ class ServerRouter {
     this.init();
   }
   private init() {
-    this.router.post("/tags", server.tags)
-    .post("/addtag", server.addtag)
-    .post("/deltag", server.deltag);
+    this.router
+      .post("/tags", server.tags)
+      .post("/addtag", server.addtag)
+      .post("/deltag", server.deltag)
+      .post("/goodstypes", server.goodstypes)
+      .post("/addgoodstype", server.addgoodstype)
+      .post("/editgoodstype", server.editgoodstype)
+      .post("/delgoodstype", server.delgoodstype)
+      .post("/goods", server.goods)
+      .post("/addgoods", server.addgoods)
+      .post("/editgoods", server.editgoods)
+      .post("/delgoods", server.delgoods);
   }
 }
 

@@ -5,15 +5,12 @@ const OSS = require("ali-oss");
 import co from "co";
 import * as fs from "fs";
 import msgCode from "../compoents/msgcode";
+import ossconfig from "../compoents/oss";
 import dbServer from "../service/server";
 import dbSystem from "../service/system";
 
 const debugLog = debug("api:controller:server");
-const client = new OSS({
-  region: "test",
-  accessKeyId: "test",
-  accessKeySecret: "test"
-});
+const client = new OSS(ossconfig);
 
 /**
  * 与功能逻辑服务端交互

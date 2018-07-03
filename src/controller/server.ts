@@ -10,9 +10,9 @@ import dbSystem from "../service/system";
 
 const debugLog = debug("api:controller:server");
 const client = new OSS({
-  region: "oss-cn-hangzhou",
-  accessKeyId: "LTAIoFlpRU51K377",
-  accessKeySecret: "Eyc24NCRkl1PcAmIf0EuyRZt0KRPZf"
+  region: "test",
+  accessKeyId: "test",
+  accessKeySecret: "test"
 });
 
 /**

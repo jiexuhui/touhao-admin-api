@@ -1,3 +1,4 @@
+import * as debug from "debug";
 import MySql from "../database/mysql";
 import { ILoginUser } from "../interface/loginusers";
 
@@ -197,6 +198,89 @@ class Server {
     return await db.exec("call p_admin_goods_del(:goodsid)", {
       goodsid
     });
+  }
+
+  /**
+   * 申请列表
+   * @param tagname
+   * @param shopid
+   * @param stime
+   * @param etime
+   * @param page
+   * @param limit
+   */
+  public static async applys(
+    anchor,
+    isbook,
+    stime: string,
+    etime: string,
+    pstime: string,
+    petime: string,
+    name: string,
+    page: number,
+    limit: number
+  ) {
+    return await db.execMultiple(
+      "call p_admin_program_infos(:anchor,:isbook,:stime,:etime,:pstime,:petime,:name,:page,:limit)",
+      { anchor, isbook, stime, etime, pstime, petime, name, page, limit }
+    );
+  }
+
+  /**
+   * 修改订阅状态
+   * @param isbook
+   */
+  public static async updateapply(id: number, isbook: number) {
+    return await db.exec("call p_admin_apply_update(:id,:isbook)", {
+      id,
+      isbook
+    });
+  }
+
+  /**
+   * 直播报告列表
+   */
+  public static async reports(pid, stime: string, etime: string, page: number, limit: number
+  ) {
+    return await db.execMultiple(
+      "call p_admin_report_list(:pid,:stime,:etime,:page,:limit)",
+      { pid, stime, etime, page, limit }
+    );
+  }
+
+  /**
+   * 添加直播报表
+   */
+  public static async addreport(
+    pid: number,
+    watchnum: number,
+    ptime: number,
+    stotal: number,
+    mtotal: number,
+    reporter: string,
+    rdesc: string,
+    userid: number
+  ) {
+    debug("api:addreport")(pid, watchnum, ptime, stotal, mtotal, reporter, rdesc, userid);
+    return await db.exec(
+      "call p_admin_report_add(:pid,:watchnum,:ptime,:stotal,:mtotal,:reporter,:rdesc,:userid)",
+      { pid, watchnum, ptime, stotal, mtotal, reporter, rdesc, userid}
+    );
+  }
+
+  /**
+   * 保存报表相关商品出售数量
+   */
+  public static async salegoods(
+    pid: number,
+    goodsid: number,
+    goodsname: string,
+    num: number
+  ) {
+    return await db.exec(
+      "call p_admin_sale_goods(:pid,:goodsid,:goodsname,:num)",
+      { pid, goodsid, goodsname, num}
+    );
   }
 }
 

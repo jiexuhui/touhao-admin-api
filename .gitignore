@@ -3,3 +3,4 @@
 /dist/*
 .idea/
 /src/configs/database/mysql.json
+/src/compoents/oss.ts

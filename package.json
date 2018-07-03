@@ -51,5 +51,14 @@
     "gulp-typescript": "^4.0.2",
     "tslint": "^5.9.1",
     "typescript": "^2.8.1"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jiexuhui/admin.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/jiexuhui/admin/issues"
+  },
+  "homepage": "https://github.com/jiexuhui/admin#readme"
 }

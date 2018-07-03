@@ -20,7 +20,7 @@ const client = new OSS(ossconfig);
 class Server {
   public static async upload(req: Request, res: Response, next: NextFunction) {
     const files = req.files;
-    debug("api:upload")("file:%o", req.files);
+    // debug("api:upload")("file:%o", req.files);
     const filename = "uploads/" + files[0].filename;
     co(function*() {
       client.useBucket("topimgs");
@@ -412,6 +412,167 @@ class Server {
       res.json(msgCode.success);
     } else {
       res.json(msgCode.parmasError);
+    }
+    return;
+  }
+
+  /**
+   * 申请列表
+   * @param req
+   * @param res
+   * @param next
+   */
+  public static async applys(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    const {
+      anchor = "",
+      isbook = "",
+      time = [],
+      ptime = [],
+      name = "",
+      page = 1,
+      limit = 20
+    } = req.body;
+    const resdata = await dbServer
+      .applys(
+        anchor,
+        isbook,
+        time[0] || "",
+        time[1] || "",
+        ptime[0] || "",
+        ptime[1] || "",
+        name,
+        page,
+        limit
+      )
+      .then()
+      .catch(err => next(err));
+    if (resdata) {
+      await dbSystem.addoperatelog(
+        req.session.user.username,
+        "查看申请列表",
+        "查看申请列表"
+      );
+      msgCode.success.data = resdata;
+      res.json(msgCode.success);
+    } else {
+      res.json(msgCode.parmasError);
+    }
+    return;
+  }
+
+  /**
+   * 修改订阅状态
+   * @param req
+   * @param res
+   * @param next
+   */
+  public static async updateapply(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    const { id = 0, isbook = 0 } = req.body;
+    const resdata = await dbServer
+      .updateapply(id, isbook)
+      .then()
+      .catch(err => next(err));
+    if (resdata[0].code === 200) {
+      await dbSystem.addoperatelog(
+        req.session.user.username,
+        "修改订阅状态",
+        "修改订阅状态:id" + id
+      );
+      msgCode.success.data = resdata[0];
+      res.json(msgCode.success);
+    } else {
+      res.json(msgCode.parmasError);
+    }
+    return;
+  }
+
+  /**
+   * 直播报告列表
+   * @param req
+   * @param res
+   * @param next
+   */
+  public static async reports(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    const {
+      pid = "",
+      time = [],
+      page = 1,
+      limit = 20
+    } = req.body;
+    const resdata = await dbServer
+      .reports(
+        pid,
+        time[0] || "",
+        time[1] || "",
+        page,
+        limit
+      )
+      .then()
+      .catch(err => next(err));
+    if (resdata) {
+      await dbSystem.addoperatelog(
+        req.session.user.username,
+        "查看申请列表",
+        "查看申请列表"
+      );
+      msgCode.success.data = resdata;
+      res.json(msgCode.success);
+    } else {
+      res.json(msgCode.parmasError);
+    }
+    return;
+  }
+
+  /**
+   * 添加报表
+   * @param req
+   * @param res
+   * @param next
+   */
+  public static async addreport(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    debug("api:addreport")("addreport:%o", req.body);
+    const {  pid = 0,
+      watchnum= 0,
+      ptime= 0,
+      stotal= 0,
+      mtotal= 0,
+      reporter= "",
+      rdesc= "",
+      goods= [] } = req.body;
+    const resdata = await dbServer
+      .addreport(pid, watchnum, ptime, stotal, mtotal, reporter, rdesc, req.session.user.userid)
+      .then()
+      .catch(err => next(err));
+    debug("api:addreport")("resdata:%o", resdata);
+    if (resdata[0].code === 200) {
+      for (const g of goods) {
+        await dbServer
+          .salegoods(resdata[0].id, g.id, g.name, g.num)
+          .then()
+          .catch(err => next(err));
+      }
+      await dbSystem.addoperatelog(
+        req.session.user.username,
+        "添加直播报表",
+        "添加直播报表:id" + resdata[0].id
+      );
+      res.json(msgCode.success);
     }
     return;
   }

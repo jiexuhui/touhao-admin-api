@@ -23,7 +23,8 @@ class ServerRouter {
       .post("/goods", server.goods)
       .post("/addgoods", server.addgoods)
       .post("/editgoods", server.editgoods)
-      .post("/delgoods", server.delgoods);
+      .post("/delgoods", server.delgoods)
+      .post("/upload", server.upload);
   }
 }
 

@@ -8,14 +8,14 @@ import * as fs from "fs";
 import * as helmet from "helmet";
 import * as jwt from "jsonwebtoken";
 import * as morgan from "morgan";
+const multer = require("multer");
 import * as path from "path";
 // import { md5 } from "./compoents/crypto";
 import msgCode from "./compoents/msgcode";
-import {
-  checkMenuPermission
-} from "./compoents/permission";
+// import { checkMenuPermission } from "./compoents/permission";
 import system from "./controller/system";
 import router from "./routes";
+const upload = multer({ dest: "uploads/" });
 // session秘钥
 const sessionSecret = "zeqg4lz67cpkutkw0oumfot5idlzog93n";
 // 权限验证配置文件
@@ -70,6 +70,7 @@ class App {
     app.use(helmet()); // 设置Http头
     app.use(compression()); // 压缩response
     app.use(bodyParser.json()); // 解析application/json
+    app.use(upload.any());
     app.use(bodyParser.urlencoded({ extended: false })); // 解析application/x-www-form-urlencode
     app.use(express.static(path.join(__dirname, "public"))); // 静态资源目录
     app.use(cookieParser(sessionSecret));
@@ -130,7 +131,7 @@ class App {
                 // this.debugLog("roleid:", system.checkpemission(req));
                 if (!authority.actionWhitelist.includes(req.path)) {
                   const permission = await system.checkpemission(req);
-                  this.debugLog("roleidperssion:%o" , permission);
+                  this.debugLog("roleidperssion:%o", permission);
                   if (permission[0].code === 0) {
                     res.json(msgCode.noPermission);
                     return;

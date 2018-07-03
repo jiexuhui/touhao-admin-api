@@ -1,12 +1,19 @@
-import axios from "axios";
 import * as debug from "debug";
 import { NextFunction, Request, Response } from "express";
 const serverCondig = require("../configs/server/api.json");
+const OSS = require("ali-oss");
+import co from "co";
+import * as fs from "fs";
 import msgCode from "../compoents/msgcode";
 import dbServer from "../service/server";
 import dbSystem from "../service/system";
 
 const debugLog = debug("api:controller:server");
+const client = new OSS({
+  region: "oss-cn-hangzhou",
+  accessKeyId: "LTAIoFlpRU51K377",
+  accessKeySecret: "Eyc24NCRkl1PcAmIf0EuyRZt0KRPZf"
+});
 
 /**
  * 与功能逻辑服务端交互
@@ -14,6 +21,25 @@ const debugLog = debug("api:controller:server");
  * @class Server
  */
 class Server {
+  public static async upload(req: Request, res: Response, next: NextFunction) {
+    const files = req.files;
+    debug("api:upload")("file:%o", req.files);
+    const filename = "uploads/" + files[0].filename;
+    co(function*() {
+      client.useBucket("topimgs");
+      const result = yield client.put("goods/test.jpg", filename);
+      // const list = yield client.list();
+      // debug("api:upload:")("result:", result);
+      fs.unlinkSync(filename);
+      msgCode.success.data = result;
+      res.json(msgCode.success);
+      return;
+    }).catch(err => {
+      next(err);
+      debug("api:upload:%j")("err:", err);
+    });
+  }
+
   /**
    * 获取tag列表
    * @param req
@@ -248,11 +274,9 @@ class Server {
       .goods(goodsname, page, limit, userid)
       .then()
       .catch(err => next(err));
-    debug("api:server:goods")("resdata1", resdata[0]);
     for (const item of resdata[0]) {
       item.thumbs = item.thumbs.split(",");
     }
-    debug("api:server:goods")("resdata2", resdata[0]);
     await dbSystem.addoperatelog(
       req.session.user.username,
       "查看物品列表",
@@ -314,7 +338,7 @@ class Server {
   }
 
   /**
-   * 增加物品
+   * 编辑物品
    * @param req
    * @param res
    * @param next

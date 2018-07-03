@@ -1,4 +1,13 @@
 {
-  "notneed": ["/admin/system/login", "/admin/system/logout"],
-  "actionWhitelist": ["/admin/system/login", "/admin/system/logout","/admin/system/userinfo","/admin/system/usermenu"]
+  "notneed": [
+    "/admin/system/login",
+    "/admin/system/logout",
+    "/admin/server/upload"
+  ],
+  "actionWhitelist": [
+    "/admin/system/login",
+    "/admin/system/logout",
+    "/admin/system/userinfo",
+    "/admin/system/usermenu"
+  ]
 }

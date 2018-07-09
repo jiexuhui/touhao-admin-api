@@ -28,7 +28,9 @@ class ServerRouter {
       .post("/applys", server.applys)
       .post("/updateapply", server.updateapply)
       .post("/reports", server.reports)
-      .post("/addreport", server.addreport);
+      .post("/addreport", server.addreport)
+      .post("/anchors", server.anchors)
+      .post("/anchorreview", server.anchorreview);
   }
 }
 

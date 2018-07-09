@@ -1,5 +1,6 @@
 import { Router } from "express";
 import msgCode from "../compoents/msgcode";
+import apiRouter from "../routes/api";
 import serverRouter from "../routes/server";
 import systemRouter from "../routes/system";
 
@@ -19,6 +20,7 @@ class BaseRouter {
     });
     this.router.use("/admin/server", serverRouter);
     this.router.use("/admin/system", systemRouter);
+    this.router.use("/api", apiRouter);
   }
 }
 

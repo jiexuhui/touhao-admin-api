@@ -14,6 +14,7 @@ export const msgCode = {
   existsUser: { code: 10003, msg: "已经存在相同的用户名" },
   existsRole: { code: 10004, msg: "已经存在相同的角色" },
   existsMenu: { code: 10005, msg: "已经存在相同的菜单" },
-  existsTag: { code: 10006, msg: "已经存在相同的标签" }
+  existsTag: { code: 10006, msg: "已经存在相同的标签" },
+  existsReport: { code: 10006, msg: "该主播已存在报表" }
 };
 export default msgCode;

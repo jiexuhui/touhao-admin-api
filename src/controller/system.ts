@@ -496,7 +496,8 @@ class System {
    * @param req
    */
   public static async checkpemission(req: any) {
-    const url = req.path.slice(7);
+    debug("api:checkpemission")("path:%o", req.path);
+    const url = req.path.slice(1);
     const roleid = req.session.user.roleid;
     const result = await dbSystem.checkPemission(url, roleid).then();
     debug("api:checkpemission")("checkpemission:%o", result);

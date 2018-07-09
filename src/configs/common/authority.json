@@ -5,9 +5,9 @@
     "/admin/server/upload"
   ],
   "actionWhitelist": [
-    "/admin/system/login",
-    "/admin/system/logout",
-    "/admin/system/userinfo",
-    "/admin/system/usermenu"
+    "/system/login",
+    "/system/logout",
+    "/system/userinfo",
+    "/system/usermenu"
   ]
 }

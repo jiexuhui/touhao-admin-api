@@ -86,7 +86,7 @@ class App {
       })
     );
     // 验证session和token
-    app.use((req, res, next) => {
+    app.use("/admin", (req, res, next) => {
       if (!authority.notneed.includes(req.originalUrl)) {
         // this.debugLog("session:%o", req.session.user);
         if (req.session === undefined) {
@@ -151,7 +151,7 @@ class App {
           next(error);
         }
       } else {
-        // this.debugLog("session:%o", req.session.user);
+        this.debugLog("session:%o", req.session.user);
         next();
       }
     });

@@ -8,7 +8,6 @@ import msgCode from "../compoents/msgcode";
 import ossconfig from "../compoents/oss";
 import dbServer from "../service/server";
 import dbSystem from "../service/system";
-import axios from "axios";
 
 const debugLog = debug("api:controller:server");
 const client = new OSS(ossconfig);
@@ -606,7 +605,7 @@ class Server {
    * @param next
    */
   public static async anchors(req: Request, res: Response, next: NextFunction) {
-    const { nickname = "", page = 1, limit = 20, review = 0 } = req.body;
+    const { nickname = "", page = 1, limit = 20, review = "" } = req.body;
     const resdata = await dbServer
       .anchors(nickname, page, limit, review)
       .then()

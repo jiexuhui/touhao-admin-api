@@ -383,7 +383,7 @@ class Server {
     const postparams = {
       touser,
       template_id: "v-MQFlNWNXwpF8i4_j--xZA7o0xeZVTJglLJfqYHi54",
-      page,
+      page: "pages/index/index",
       form_id: formId,
       data: {
         keyword1: { value: data1 },

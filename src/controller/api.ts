@@ -243,5 +243,25 @@ class Api {
       })
       .catch(err => next(err));
   }
+  /**
+   * 获取物品类型
+   * @param req
+   * @param res
+   * @param next
+   */
+  public static async cateloglist(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    await dbApi
+      .cateloglist()
+      .then(data => {
+        msgCode.success.data = data;
+        res.json(msgCode.success);
+        return;
+      })
+      .catch(err => next(err));
+  }
 }
 export default Api;

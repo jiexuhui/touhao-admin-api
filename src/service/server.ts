@@ -1,7 +1,7 @@
+import axios from "axios";
 import * as debug from "debug";
 import MySql from "../database/mysql";
 import { ILoginUser } from "../interface/loginusers";
-import axios from "axios";
 
 const dbConfig = require("../configs/database/mysql.json");
 const db = new MySql(dbConfig.admin.connConfig);
@@ -139,7 +139,8 @@ class Server {
     thumbs: string,
     category: number,
     commission: number,
-    tags: string
+    tags: string,
+    banner: number
   ) {
     debug("api:addgoods")(
       userid,
@@ -154,7 +155,8 @@ class Server {
       tags
     );
     return await db.exec(
-      "call p_admin_goods_add(:userid,:goodsname,:price,:storenum,:point,:main,:thumbs,:category,:commission,:tags)",
+      "call p_admin_goods_add(:userid,:goodsname,:price,:storenum,:point," +
+        ":main,:thumbs,:category,:commission,:tags,:banner)",
       {
         userid,
         goodsname,
@@ -165,7 +167,8 @@ class Server {
         thumbs,
         category,
         commission,
-        tags
+        tags,
+        banner
       }
     );
   }
@@ -187,11 +190,12 @@ class Server {
     thumbs: string,
     category: number,
     commission: number,
-    tags: string
+    tags: string,
+    banner: number
   ) {
     return await db.exec(
       "call p_admin_goods_edit(:goodsid,:userid,:goodsname,:price,:storenum,:point,:main," +
-        ":thumbs,:category,:commission,:tags)",
+        ":thumbs,:category,:commission,:tags,:banner)",
       {
         goodsid,
         userid,
@@ -203,7 +207,8 @@ class Server {
         thumbs,
         category,
         commission,
-        tags
+        tags,
+        banner
       }
     );
   }

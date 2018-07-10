@@ -20,13 +20,16 @@ const client = new OSS(ossconfig);
 class Server {
   public static async upload(req: Request, res: Response, next: NextFunction) {
     const files = req.files;
-    // debug("api:upload")("file:%o", req.files);
+    debug("api:upload")("file:%o", req.files);
     const filename = "uploads/" + files[0].filename;
     co(function*() {
       client.useBucket("topimgs");
-      const result = yield client.put("goods/test.jpg", filename);
-      // const list = yield client.list();
-      // debug("api:upload:")("result:", result);
+      const result = yield client.put(
+        "goods/" + files[0].filename + ".jpg",
+        filename
+      );
+      const list = yield client.list();
+      debug("api:upload:")("list:", result);
       fs.unlinkSync(filename);
       msgCode.success.data = result;
       res.json(msgCode.success);
@@ -304,7 +307,8 @@ class Server {
       thumbs = "",
       category = 1,
       commission = 0,
-      tags = []
+      tags = [],
+      banner = 0
     } = req.body;
     const userid = req.session.user.userid;
     const resdata = await dbServer
@@ -318,7 +322,8 @@ class Server {
         thumbs,
         category,
         commission,
-        tags.toString()
+        tags.toString(),
+        banner
       )
       .then()
       .catch(err => next(err));
@@ -331,7 +336,7 @@ class Server {
       msgCode.success.data = resdata;
       res.json(msgCode.success);
     } else {
-      res.json(msgCode.parmasError);
+      res.json(msgCode.existsGoods);
     }
     return;
   }
@@ -357,7 +362,8 @@ class Server {
       thumbs = "",
       category = 1,
       commission = 0,
-      tags = []
+      tags = [],
+      banner = 0
     } = req.body;
     const userid = req.session.user.userid;
     const resdata = await dbServer
@@ -372,7 +378,8 @@ class Server {
         thumbs,
         category,
         commission,
-        tags.toString()
+        tags.toString(),
+        banner
       )
       .then()
       .catch(err => next(err));

@@ -21,7 +21,8 @@ class ApiRouter {
       .post("/addcheckedlist", api.addcheckedlist)
       .post("/checkedgoods", api.checkedgoods)
       .post("/delcheckedgoods", api.delcheckedgoods)
-      .post("/applyprogram", api.applyprogram);
+      .post("/applyprogram", api.applyprogram)
+      .post("/cateloglist", api.cateloglist);
   }
 }
 

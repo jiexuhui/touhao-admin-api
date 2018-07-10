@@ -129,5 +129,11 @@ class Api {
       }
     );
   }
+  /**
+   * 获取物品类型
+   */
+  public static async cateloglist() {
+    return await db.exec("call p_api_category_list()");
+  }
 }
 export default Api;

@@ -212,9 +212,9 @@ class Server {
     res: Response,
     next: NextFunction
   ) {
-    const { id = 0, name = "" } = req.body;
+    const { id = 0, name = "", banner = "" } = req.body;
     const resdata = await dbServer
-      .editgoodstype(id, name)
+      .editgoodstype(id, name, banner)
       .then()
       .catch(err => next(err));
     if (resdata[0].code === 200) {

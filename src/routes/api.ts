@@ -22,7 +22,10 @@ class ApiRouter {
       .post("/checkedgoods", api.checkedgoods)
       .post("/delcheckedgoods", api.delcheckedgoods)
       .post("/applyprogram", api.applyprogram)
-      .post("/cateloglist", api.cateloglist);
+      .post("/cateloglist", api.cateloglist)
+      .post("/userprograms", api.userprograms)
+      .post("/programgoods", api.programgoods)
+      .post("/invalidprogram", api.invalidprogram);
   }
 }
 

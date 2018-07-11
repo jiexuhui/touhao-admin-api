@@ -71,8 +71,19 @@ class Api {
   /**
    * 获取首页数据
    */
-  public static async goodslist(openid: string) {
-    return await db.execMultiple("call p_api_goods_list(:openid)", { openid });
+  public static async goodslist(
+    openid: string,
+    category: number,
+    classify: number
+  ) {
+    return await db.execMultiple(
+      "call p_api_goods_list(:openid,:category,:classify)",
+      {
+        openid,
+        category,
+        classify
+      }
+    );
   }
 
   /**
@@ -132,8 +143,34 @@ class Api {
   /**
    * 获取物品类型
    */
-  public static async cateloglist() {
-    return await db.exec("call p_api_category_list()");
+  public static async cateloglist(id: number) {
+    return await db.exec("call p_api_category_list(:id)", { id });
+  }
+
+  /**
+   * 获取用户播单
+   */
+  public static async userprograms(openid: string, status: number) {
+    return await db.exec("call p_api_user_programs(:openid,:status)", {
+      openid,
+      status
+    });
+  }
+
+  /**
+   * 获取用户播单内物品
+   */
+  public static async programgoods(goodslist: number) {
+    return await db.exec("call p_api_program_goods(:goodslist)", {
+      goodslist
+    });
+  }
+
+  /**
+   * 取消播单
+   */
+  public static async invalidprogram(id: number) {
+    return await db.exec("call p_api_cancel_program(:id)", { id });
   }
 }
 export default Api;

@@ -95,7 +95,7 @@ class Api {
   }
 
   /**
-   * 根据openid 获取直播报告
+   * 获取直播报告详情
    * @param req
    * @param res
    * @param next
@@ -117,7 +117,7 @@ class Api {
   }
 
   /**
-   * 根据openid 获取直播报告
+   * 获取物品列表
    * @param req
    * @param res
    * @param next
@@ -127,9 +127,9 @@ class Api {
     res: Response,
     next: NextFunction
   ) {
-    const openid = req.body.openid;
+    const { openid = "", category = 0, classify = 0 } = req.body;
     await dbApi
-      .goodslist(openid)
+      .goodslist(openid, category, classify)
       .then(data => {
         msgCode.success.data = data;
         res.json(msgCode.success);
@@ -254,8 +254,93 @@ class Api {
     res: Response,
     next: NextFunction
   ) {
+    const { id = "" } = req.body;
     await dbApi
-      .cateloglist()
+      .cateloglist(id)
+      .then(data => {
+        const result = [];
+        for (const item of data) {
+          if (item.fid === 0) {
+            item.children = [];
+            for (const i of data) {
+              if (i.fid === item.id) {
+                item.children.push(i);
+              }
+            }
+            result.push(item);
+          }
+        }
+        debug("api:api")("cateloglist:result:%o", result);
+        if (id === "") {
+          msgCode.success.data = result;
+        } else {
+          msgCode.success.data = data;
+        }
+        res.json(msgCode.success);
+        return;
+      })
+      .catch(err => next(err));
+  }
+
+  /**
+   * 根据openid 获取直播报告
+   * @param req
+   * @param res
+   * @param next
+   */
+  public static async userprograms(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    const openid = req.body.openid;
+    const status = req.body.status;
+    await dbApi
+      .userprograms(openid, status)
+      .then(data => {
+        msgCode.success.data = data;
+        res.json(msgCode.success);
+        return;
+      })
+      .catch(err => next(err));
+  }
+
+  /**
+   * 根据openid 获取播单内物品
+   * @param req
+   * @param res
+   * @param next
+   */
+  public static async programgoods(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    const goodslist = req.body.goodslist;
+    await dbApi
+      .programgoods(goodslist)
+      .then(data => {
+        msgCode.success.data = data;
+        res.json(msgCode.success);
+        return;
+      })
+      .catch(err => next(err));
+  }
+
+  /**
+   * 根据openid 获取播单内物品
+   * @param req
+   * @param res
+   * @param next
+   */
+  public static async invalidprogram(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    const id = req.body.id;
+    await dbApi
+      .invalidprogram(id)
       .then(data => {
         msgCode.success.data = data;
         res.json(msgCode.success);

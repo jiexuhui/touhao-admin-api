@@ -81,10 +81,11 @@ class Server {
    * @param page
    * @param limit
    */
-  public static async editgoodstype(id: number, name: string) {
-    return await db.exec("call p_admin_goodstype_edit(:id,:name)", {
+  public static async editgoodstype(id: number, name: string, banner: string) {
+    return await db.exec("call p_admin_goodstype_edit(:id,:name,:banner)", {
       id,
-      name
+      name,
+      banner
     });
   }
 

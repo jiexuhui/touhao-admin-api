@@ -275,7 +275,10 @@ class Server {
       .then()
       .catch(err => next(err));
     for (const item of resdata[0]) {
-      item.thumbs = item.thumbs.split(",");
+      // debug("api:goods")("goods:%o", resdata[0]);
+      if (item.thumbs !== null) {
+        item.thumbs = item.thumbs.split(",");
+      }
     }
     await dbSystem.addoperatelog(
       req.session.user.username,
@@ -363,7 +366,8 @@ class Server {
       category = 1,
       commission = 0,
       tags = [],
-      banner = 0
+      banner = 0,
+      classify = 0
     } = req.body;
     const userid = req.session.user.userid;
     const resdata = await dbServer
@@ -379,7 +383,8 @@ class Server {
         category,
         commission,
         tags.toString(),
-        banner
+        banner,
+        classify
       )
       .then()
       .catch(err => next(err));
@@ -677,6 +682,114 @@ class Server {
         );
       }
       msgCode.success.data = resdata[0];
+      res.json(msgCode.success);
+    } else {
+      res.json(msgCode.parmasError);
+    }
+    return;
+  }
+
+  /**
+   * 首页分类列表
+   * @param req
+   * @param res
+   * @param next
+   */
+  public static async classify(req: Request, res: Response, next: NextFunction) {
+    const { page = 1, limit = 20 } = req.body;
+    const resdata = await dbServer
+      .classify(page, limit)
+      .then()
+      .catch(err => next(err));
+    // debug("api:anchors")("list:%o", resdata);
+    if (resdata) {
+      await dbSystem.addoperatelog(
+        req.session.user.username,
+        "查看首页分类列表",
+        "查看首页分类列表"
+      );
+      msgCode.success.data = resdata;
+      res.json(msgCode.success);
+    } else {
+      res.json(msgCode.parmasError);
+    }
+    return;
+  }
+
+  /**
+   * 增加首页分类
+   * @param req
+   * @param res
+   * @param next
+   */
+  public static async addclassify(req: Request, res: Response, next: NextFunction) {
+    const { name = "" } = req.body;
+    const resdata = await dbServer
+      .addclassify(name)
+      .then()
+      .catch(err => next(err));
+    // debug("api:anchors")("list:%o", resdata);
+    if (resdata) {
+      await dbSystem.addoperatelog(
+        req.session.user.username,
+        "增加首页分类",
+        "增加首页分类"
+      );
+      msgCode.success.data = resdata;
+      res.json(msgCode.success);
+    } else {
+      res.json(msgCode.parmasError);
+    }
+    return;
+  }
+
+  /**
+   * 增加首页分类
+   * @param req
+   * @param res
+   * @param next
+   */
+  public static async editclassify(req: Request, res: Response, next: NextFunction) {
+    const {id = 0, name = "" } = req.body;
+    const resdata = await dbServer
+      .editclassify(id, name)
+      .then()
+      .catch(err => next(err));
+    // debug("api:anchors")("list:%o", resdata);
+    if (resdata) {
+      await dbSystem.addoperatelog(
+        req.session.user.username,
+        "编辑首页分类，id:" + id ,
+        "编辑首页分类,id:" + id
+      );
+      msgCode.success.data = resdata;
+      res.json(msgCode.success);
+    } else {
+      res.json(msgCode.parmasError);
+    }
+    return;
+  }
+
+  /**
+   * 删除首页分类
+   * @param req
+   * @param res
+   * @param next
+   */
+  public static async delclassify(req: Request, res: Response, next: NextFunction) {
+    const {id = 0} = req.body;
+    const resdata = await dbServer
+      .delclassify(id)
+      .then()
+      .catch(err => next(err));
+    // debug("api:anchors")("list:%o", resdata);
+    if (resdata) {
+      await dbSystem.addoperatelog(
+        req.session.user.username,
+        "删除首页分类，id:" + id ,
+        "删除首页分类,id:" + id
+      );
+      msgCode.success.data = resdata;
       res.json(msgCode.success);
     } else {
       res.json(msgCode.parmasError);

@@ -30,7 +30,11 @@ class ServerRouter {
       .post("/reports", server.reports)
       .post("/addreport", server.addreport)
       .post("/anchors", server.anchors)
-      .post("/anchorreview", server.anchorreview);
+      .post("/anchorreview", server.anchorreview)
+      .post("/classify", server.classify)
+      .post("/addclassify", server.addclassify)
+      .post("/editclassify", server.editclassify)
+      .post("/delclassify", server.delclassify);
   }
 }
 

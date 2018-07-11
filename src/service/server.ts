@@ -192,11 +192,12 @@ class Server {
     category: number,
     commission: number,
     tags: string,
-    banner: number
+    banner: number,
+    classify: number
   ) {
     return await db.exec(
       "call p_admin_goods_edit(:goodsid,:userid,:goodsname,:price,:storenum,:point,:main," +
-        ":thumbs,:category,:commission,:tags,:banner)",
+        ":thumbs,:category,:commission,:tags,:banner,:classify)",
       {
         goodsid,
         userid,
@@ -209,7 +210,8 @@ class Server {
         category,
         commission,
         tags,
-        banner
+        banner,
+        classify
       }
     );
   }
@@ -402,6 +404,52 @@ class Server {
     };
     const result = await axios.post(url, postparams).then();
     return result.data;
+  }
+
+  /**
+   * 首页分类列表
+   * @param id
+   * @param review
+   */
+  public static async classify(page: number, limit: number) {
+    return await db.execMultiple("call p_api_classify_list(:page,:limit)", {
+      page,
+      limit
+    });
+  }
+
+  /**
+   * 增加首页分类
+   * @param id
+   * @param review
+   */
+  public static async addclassify(name: string) {
+    return await db.exec("call p_api_classify_add(:name)", {
+      name
+    });
+  }
+
+  /**
+   * 编辑首页分类
+   * @param id
+   * @param review
+   */
+  public static async editclassify(id: number, name: string) {
+    return await db.exec("call p_api_classify_edit(:id,:name)", {
+      id,
+      name
+    });
+  }
+
+  /**
+   * 删除首页分类
+   * @param id
+   * @param review
+   */
+  public static async delclassify(id: number) {
+    return await db.exec("call p_api_classify_del(:id)", {
+      id
+    });
   }
 }
 

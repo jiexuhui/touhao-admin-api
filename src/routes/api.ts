@@ -25,7 +25,8 @@ class ApiRouter {
       .post("/cateloglist", api.cateloglist)
       .post("/userprograms", api.userprograms)
       .post("/programgoods", api.programgoods)
-      .post("/invalidprogram", api.invalidprogram);
+      .post("/invalidprogram", api.invalidprogram)
+      .post("/searchindex", api.searchindex);
   }
 }
 

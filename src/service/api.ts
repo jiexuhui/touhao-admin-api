@@ -74,14 +74,16 @@ class Api {
   public static async goodslist(
     openid: string,
     category: number,
-    classify: number
+    classify: number,
+    keyword: string
   ) {
     return await db.execMultiple(
-      "call p_api_goods_list(:openid,:category,:classify)",
+      "call p_api_goods_list(:openid,:category,:classify,:keyword)",
       {
         openid,
         category,
-        classify
+        classify,
+        keyword
       }
     );
   }
@@ -171,6 +173,15 @@ class Api {
    */
   public static async invalidprogram(id: number) {
     return await db.exec("call p_api_cancel_program(:id)", { id });
+  }
+
+  /**
+   * 搜索页数据
+   */
+  public static async searchindex(openid: string) {
+    return await db.execMultiple("call p_api_search_index(:openid)", {
+      openid
+    });
   }
 }
 export default Api;

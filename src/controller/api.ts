@@ -127,9 +127,9 @@ class Api {
     res: Response,
     next: NextFunction
   ) {
-    const { openid = "", category = 0, classify = 0 } = req.body;
+    const { openid = "", category = 0, classify = 0, keyword = "" } = req.body;
     await dbApi
-      .goodslist(openid, category, classify)
+      .goodslist(openid, category, classify, keyword)
       .then(data => {
         msgCode.success.data = data;
         res.json(msgCode.success);
@@ -341,6 +341,28 @@ class Api {
     const id = req.body.id;
     await dbApi
       .invalidprogram(id)
+      .then(data => {
+        msgCode.success.data = data;
+        res.json(msgCode.success);
+        return;
+      })
+      .catch(err => next(err));
+  }
+
+  /**
+   * 根据openid 获取搜索页数据
+   * @param req
+   * @param res
+   * @param next
+   */
+  public static async searchindex(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    const openid = req.body.openid;
+    await dbApi
+      .searchindex(openid)
       .then(data => {
         msgCode.success.data = data;
         res.json(msgCode.success);

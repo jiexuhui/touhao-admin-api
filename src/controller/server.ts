@@ -311,7 +311,9 @@ class Server {
       category = 1,
       commission = 0,
       tags = [],
-      banner = 0
+      banner = 0,
+      taobaourl = "",
+      stores = []
     } = req.body;
     const userid = req.session.user.userid;
     const resdata = await dbServer
@@ -326,7 +328,8 @@ class Server {
         category,
         commission,
         tags.toString(),
-        banner
+        banner,
+        taobaourl
       )
       .then()
       .catch(err => next(err));
@@ -367,7 +370,8 @@ class Server {
       commission = 0,
       tags = [],
       banner = 0,
-      classify = 0
+      classify = 0,
+      taobaourl = ""
     } = req.body;
     const userid = req.session.user.userid;
     const resdata = await dbServer
@@ -384,7 +388,8 @@ class Server {
         commission,
         tags.toString(),
         banner,
-        classify
+        classify,
+        taobaourl
       )
       .then()
       .catch(err => next(err));
@@ -695,7 +700,11 @@ class Server {
    * @param res
    * @param next
    */
-  public static async classify(req: Request, res: Response, next: NextFunction) {
+  public static async classify(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
     const { page = 1, limit = 20 } = req.body;
     const resdata = await dbServer
       .classify(page, limit)
@@ -722,7 +731,11 @@ class Server {
    * @param res
    * @param next
    */
-  public static async addclassify(req: Request, res: Response, next: NextFunction) {
+  public static async addclassify(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
     const { name = "" } = req.body;
     const resdata = await dbServer
       .addclassify(name)
@@ -749,8 +762,12 @@ class Server {
    * @param res
    * @param next
    */
-  public static async editclassify(req: Request, res: Response, next: NextFunction) {
-    const {id = 0, name = "" } = req.body;
+  public static async editclassify(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    const { id = 0, name = "" } = req.body;
     const resdata = await dbServer
       .editclassify(id, name)
       .then()
@@ -759,7 +776,7 @@ class Server {
     if (resdata) {
       await dbSystem.addoperatelog(
         req.session.user.username,
-        "编辑首页分类，id:" + id ,
+        "编辑首页分类，id:" + id,
         "编辑首页分类,id:" + id
       );
       msgCode.success.data = resdata;
@@ -776,8 +793,12 @@ class Server {
    * @param res
    * @param next
    */
-  public static async delclassify(req: Request, res: Response, next: NextFunction) {
-    const {id = 0} = req.body;
+  public static async delclassify(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    const { id = 0 } = req.body;
     const resdata = await dbServer
       .delclassify(id)
       .then()
@@ -786,7 +807,7 @@ class Server {
     if (resdata) {
       await dbSystem.addoperatelog(
         req.session.user.username,
-        "删除首页分类，id:" + id ,
+        "删除首页分类，id:" + id,
         "删除首页分类,id:" + id
       );
       msgCode.success.data = resdata;

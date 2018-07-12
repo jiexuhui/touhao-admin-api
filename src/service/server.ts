@@ -141,7 +141,8 @@ class Server {
     category: number,
     commission: number,
     tags: string,
-    banner: number
+    banner: number,
+    taobaourl: string
   ) {
     debug("api:addgoods")(
       userid,
@@ -153,11 +154,12 @@ class Server {
       thumbs,
       category,
       commission,
-      tags
+      tags,
+      taobaourl
     );
     return await db.exec(
       "call p_admin_goods_add(:userid,:goodsname,:price,:storenum,:point," +
-        ":main,:thumbs,:category,:commission,:tags,:banner)",
+        ":main,:thumbs,:category,:commission,:tags,:banner,:taobaourl)",
       {
         userid,
         goodsname,
@@ -169,7 +171,8 @@ class Server {
         category,
         commission,
         tags,
-        banner
+        banner,
+        taobaourl
       }
     );
   }
@@ -193,11 +196,12 @@ class Server {
     commission: number,
     tags: string,
     banner: number,
-    classify: number
+    classify: number,
+    taobaourl: string
   ) {
     return await db.exec(
       "call p_admin_goods_edit(:goodsid,:userid,:goodsname,:price,:storenum,:point,:main," +
-        ":thumbs,:category,:commission,:tags,:banner,:classify)",
+        ":thumbs,:category,:commission,:tags,:banner,:classify,:taobaourl)",
       {
         goodsid,
         userid,
@@ -211,7 +215,8 @@ class Server {
         commission,
         tags,
         banner,
-        classify
+        classify,
+        taobaourl
       }
     );
   }

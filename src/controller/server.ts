@@ -334,6 +334,18 @@ class Server {
       .then()
       .catch(err => next(err));
     if (resdata[0].code === 200) {
+      if (stores.length > 0) {
+        debug("api:addgoods")("stores:" , stores);
+        let j = 0;
+        for (const i of stores) {
+          if (j === 0) {
+            await dbServer.addstore(resdata[0].goodsid, i.name, i.num, 1);
+          } else {
+            await dbServer.addstore(resdata[0].goodsid, i.name, i.num, 0);
+          }
+          j++;
+        }
+      }
       await dbSystem.addoperatelog(
         req.session.user.username,
         "增加物品",
@@ -371,7 +383,8 @@ class Server {
       tags = [],
       banner = 0,
       classify = 0,
-      taobaourl = ""
+      taobaourl = "",
+      stores = []
     } = req.body;
     const userid = req.session.user.userid;
     const resdata = await dbServer
@@ -394,6 +407,18 @@ class Server {
       .then()
       .catch(err => next(err));
     if (resdata[0].code === 200) {
+      if (stores.length > 0) {
+        debug("api:addgoods")("stores:" , stores);
+        let j = 0;
+        for (const i of stores) {
+          if (j === 0) {
+            await dbServer.addstore(goodsid, i.name, i.num, 1);
+          } else {
+            await dbServer.addstore(goodsid, i.name, i.num, 0);
+          }
+          j++;
+        }
+      }
       await dbSystem.addoperatelog(
         req.session.user.username,
         "编辑",

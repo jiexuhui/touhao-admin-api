@@ -456,6 +456,21 @@ class Server {
       id
     });
   }
+
+  /**
+   * 删除首页分类
+   * @param goodsid
+   * @param name
+   * @param num
+   */
+  public static async addstore(goodsid: number, name: string, num: number, isdel: number) {
+    return await db.exec("call p_admin_store_add(:goodsid,:name,:num,:isdel)", {
+      goodsid,
+      name,
+      num,
+      isdel
+    });
+  }
 }
 
 export default Server;

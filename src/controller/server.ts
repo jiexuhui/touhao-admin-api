@@ -279,6 +279,14 @@ class Server {
       if (item.thumbs !== null) {
         item.thumbs = item.thumbs.split(",");
       }
+      const sstores = await dbServer.goodsStore(item.goodsid);
+      item.showshor = "";
+      if (sstores.length > 0) {
+        for (const s of sstores) {
+          item.showshor = item.showshor + s.store + ";";
+        }
+      }
+      debug("api:goods")("stores:", item.stores);
     }
     await dbSystem.addoperatelog(
       req.session.user.username,
@@ -335,13 +343,25 @@ class Server {
       .catch(err => next(err));
     if (resdata[0].code === 200) {
       if (stores.length > 0) {
-        debug("api:addgoods")("stores:" , stores);
+        debug("api:addgoods")("stores:", stores);
         let j = 0;
         for (const i of stores) {
           if (j === 0) {
-            await dbServer.addstore(resdata[0].goodsid, i.name, i.num, 1);
+            await dbServer.addstore(
+              resdata[0].goodsid,
+              i.color,
+              i.size,
+              i.num,
+              1
+            );
           } else {
-            await dbServer.addstore(resdata[0].goodsid, i.name, i.num, 0);
+            await dbServer.addstore(
+              resdata[0].goodsid,
+              i.color,
+              i.size,
+              i.num,
+              0
+            );
           }
           j++;
         }
@@ -408,17 +428,18 @@ class Server {
       .catch(err => next(err));
     if (resdata[0].code === 200) {
       if (stores.length > 0) {
-        debug("api:addgoods")("stores:" , stores);
+        debug("api:editgoods")("stores:", stores);
         let j = 0;
         for (const i of stores) {
           if (j === 0) {
-            await dbServer.addstore(goodsid, i.name, i.num, 1);
+            await dbServer.addstore(goodsid, i.color, i.size, i.num, 1);
           } else {
-            await dbServer.addstore(goodsid, i.name, i.num, 0);
+            await dbServer.addstore(goodsid, i.color, i.size, i.num, 0);
           }
           j++;
         }
       }
+
       await dbSystem.addoperatelog(
         req.session.user.username,
         "编辑",
@@ -470,8 +491,8 @@ class Server {
    */
   public static async applys(req: Request, res: Response, next: NextFunction) {
     const {
-      anchor = "",
-      status = "",
+      anchor = 0,
+      status = 2,
       time = [],
       ptime = [],
       name = "",
@@ -543,7 +564,7 @@ class Server {
    * @param next
    */
   public static async reports(req: Request, res: Response, next: NextFunction) {
-    const { pid = "", time = [], page = 1, limit = 20 } = req.body;
+    const { pid = 0, time = [], page = 1, limit = 20 } = req.body;
     const resdata = await dbServer
       .reports(pid, time[0] || "", time[1] || "", page, limit)
       .then()
@@ -835,6 +856,32 @@ class Server {
         "删除首页分类，id:" + id,
         "删除首页分类,id:" + id
       );
+      msgCode.success.data = resdata;
+      res.json(msgCode.success);
+    } else {
+      res.json(msgCode.parmasError);
+    }
+    return;
+  }
+
+  /**
+   * 获取物品详情
+   * @param req
+   * @param res
+   * @param next
+   */
+  public static async goodsdetail(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    const { goodsids = "" } = req.body;
+    const resdata = await dbServer
+      .goodsdetail(goodsids)
+      .then()
+      .catch(err => next(err));
+    // debug("api:anchors")("list:%o", resdata);
+    if (resdata) {
       msgCode.success.data = resdata;
       res.json(msgCode.success);
     } else {

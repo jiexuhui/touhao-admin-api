@@ -272,7 +272,7 @@ class Server {
    * 直播报告列表
    */
   public static async reports(
-    pid,
+    pid: number,
     stime: string,
     etime: string,
     page: number,
@@ -458,17 +458,47 @@ class Server {
   }
 
   /**
-   * 删除首页分类
+   * 添加库存
    * @param goodsid
    * @param name
    * @param num
    */
-  public static async addstore(goodsid: number, name: string, num: number, isdel: number) {
-    return await db.exec("call p_admin_store_add(:goodsid,:name,:num,:isdel)", {
-      goodsid,
-      name,
-      num,
-      isdel
+  public static async addstore(
+    goodsid: number,
+    color: string,
+    size: string,
+    num: number,
+    isdel: number
+  ) {
+    return await db.exec(
+      "call p_admin_store_add(:goodsid,:color,:size,:num,:isdel)",
+      {
+        goodsid,
+        color,
+        size,
+        num,
+        isdel
+      }
+    );
+  }
+
+  /**
+   * 获取物品库存详情
+   * @param goodsids
+   */
+  public static async goodsStore(goodsids: string) {
+    return await db.exec("call p_admin_goods_store(:goodsids)", {
+      goodsids
+    });
+  }
+
+  /**
+   * 获取播单物品详情
+   * @param goodsids
+   */
+  public static async goodsdetail(goodsids: string) {
+    return await db.exec("call p_admin_program_goods(:goodsids)", {
+      goodsids
     });
   }
 }

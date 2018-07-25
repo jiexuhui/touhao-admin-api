@@ -254,7 +254,7 @@ class Api {
     res: Response,
     next: NextFunction
   ) {
-    const { id = "" } = req.body;
+    const { id = 9999 } = req.body;
     await dbApi
       .cateloglist(id)
       .then(data => {
@@ -271,7 +271,7 @@ class Api {
           }
         }
         debug("api:api")("cateloglist:result:%o", result);
-        if (id === "") {
+        if (id === 9999) {
           msgCode.success.data = result;
         } else {
           msgCode.success.data = data;
@@ -365,6 +365,63 @@ class Api {
       .searchindex(openid)
       .then(data => {
         msgCode.success.data = data;
+        res.json(msgCode.success);
+        return;
+      })
+      .catch(err => next(err));
+  }
+
+  /**
+   * 根据goodsid 获取物品库存详情
+   * @param req
+   * @param res
+   * @param next
+   */
+  public static async goodsstore(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    const goodsid = req.body.goodsid;
+    await dbApi
+      .goodsstore(goodsid)
+      .then(data => {
+        const row = {
+          colors: [],
+          size: [],
+          data: []
+        };
+
+        const result = [];
+        debug("api:goodsstore")("data:%o", data);
+        msgCode.success.data = data;
+        for (const c of data[0]) {
+          row.colors.push(c.color);
+        }
+        debug("api:goodsstore")("colors:%o", row.colors);
+        for (const s of data[1]) {
+          row.size.push(s.size);
+        }
+        debug("api:goodsstore")("size:%o", row.size);
+        if (data[2].length > 0) {
+          for (const index of row.colors) {
+            const keyarr = [];
+            for (const i of row.size) {
+              let num = 0;
+              for (const item of data[2]) {
+                if (item.color === index && item.size === i) {
+                  num = item.num;
+                }
+              }
+              keyarr.push(num);
+            }
+            debug("api:goodsstore")("obj:%o", keyarr);
+            result.push(keyarr);
+          }
+        }
+        debug("api:goodsstore")("result:%o", result);
+        row.data = result;
+        msgCode.success.data = row;
         res.json(msgCode.success);
         return;
       })

@@ -139,12 +139,20 @@ class MySqlDB {
         conn.query(sqlStr, params, (error, results, fields) => {
           conn.release();
           if (error) {
+            debug("api:mysql:query:string")("%s", sqlStr);
+            debug("api:mysql:query:params")(
+              "%o",
+              typeof params === "undefined" ? "{}" : params
+            );
             debug("api:mysql:query:queryerror")("%s", error.message);
             reject({ error: error.message });
             return;
           }
           debug("api:mysql:query:string")("%s", sqlStr);
-          debug("api:mysql:query:params")("%o", typeof params === "undefined" ? "{}" : params);
+          debug("api:mysql:query:params")(
+            "%o",
+            typeof params === "undefined" ? "{}" : params
+          );
           // debug("api:mysql:query:results")("%o", results);
           resolve(results);
         });
@@ -158,7 +166,9 @@ class MySqlDB {
           }
         });
       });
-    }).catch(err => debug("api:mysql:query")("%s", `query - error --> ${JSON.stringify(err)}`));
+    }).catch(err =>
+      debug("api:mysql:query")("%s", `query - error --> ${JSON.stringify(err)}`)
+    );
   }
   /**
    *  执行存储过程，返回单条执行结果

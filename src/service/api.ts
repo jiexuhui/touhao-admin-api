@@ -183,5 +183,14 @@ class Api {
       openid
     });
   }
+
+  /**
+   * 物品库存详情
+   */
+  public static async goodsstore(goodsid: number) {
+    return await db.execMultiple("call p_api_goods_store(:goodsid)", {
+      goodsid
+    });
+  }
 }
 export default Api;

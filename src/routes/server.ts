@@ -34,7 +34,8 @@ class ServerRouter {
       .post("/classify", server.classify)
       .post("/addclassify", server.addclassify)
       .post("/editclassify", server.editclassify)
-      .post("/delclassify", server.delclassify);
+      .post("/delclassify", server.delclassify)
+      .post("/goodsdetail", server.goodsdetail);
   }
 }
 

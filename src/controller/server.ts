@@ -280,13 +280,14 @@ class Server {
         item.thumbs = item.thumbs.split(",");
       }
       const sstores = await dbServer.goodsStore(item.goodsid);
+      // debug("api:goods")("stores:", sstores);
       item.showshor = "";
       if (sstores.length > 0) {
         for (const s of sstores) {
           item.showshor = item.showshor + s.store + ";";
         }
       }
-      debug("api:goods")("stores:", item.stores);
+      // debug("api:goods")("stores:", item.stores);
     }
     await dbSystem.addoperatelog(
       req.session.user.username,
@@ -321,7 +322,8 @@ class Server {
       tags = [],
       banner = 0,
       taobaourl = "",
-      stores = []
+      stores = [],
+      classify = 0
     } = req.body;
     const userid = req.session.user.userid;
     const resdata = await dbServer
@@ -337,7 +339,8 @@ class Server {
         commission,
         tags.toString(),
         banner,
-        taobaourl
+        taobaourl,
+        classify
       )
       .then()
       .catch(err => next(err));

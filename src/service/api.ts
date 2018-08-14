@@ -75,15 +75,17 @@ class Api {
     openid: string,
     category: number,
     classify: number,
-    keyword: string
+    keyword: string,
+    page: number
   ) {
     return await db.execMultiple(
-      "call p_api_goods_list(:openid,:category,:classify,:keyword)",
+      "call p_api_goods_list(:openid,:category,:classify,:keyword,:page)",
       {
         openid,
         category,
         classify,
-        keyword
+        keyword,
+        page
       }
     );
   }

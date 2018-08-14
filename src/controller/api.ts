@@ -127,9 +127,15 @@ class Api {
     res: Response,
     next: NextFunction
   ) {
-    const { openid = "", category = 0, classify = 0, keyword = "" } = req.body;
+    const {
+      openid = "",
+      category = 0,
+      classify = 0,
+      keyword = "",
+      page = 1
+    } = req.body;
     await dbApi
-      .goodslist(openid, category, classify, keyword)
+      .goodslist(openid, category, classify, keyword, page)
       .then(data => {
         msgCode.success.data = data;
         res.json(msgCode.success);
